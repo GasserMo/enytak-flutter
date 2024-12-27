@@ -51,15 +51,15 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
       final response = await http.get(
         Uri.parse('http://164.92.111.149/api/services/$serviceId/'),
         headers: {
-          'accept': 'application/json',
+          'accept': 'application/json; charset=utf-8',
           'X-CSRFTOKEN':
               'bU7BqYWiamawqbj1jtuns2BsKzX58Arqaxe6rahnFY0NQmwBDCwL3097bSW2O7BZ',
         },
       );
-
       if (response.statusCode == 200) {
         setState(() {
-          serviceData = jsonDecode(response.body);
+          serviceData = json.decode(utf8.decode(response.bodyBytes));
+          ;
           isLoading = false;
         });
       } else {

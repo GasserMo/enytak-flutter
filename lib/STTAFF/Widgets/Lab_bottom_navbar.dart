@@ -1,30 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/AppointmentScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/HomeScreen.dart';
+import 'package:flutter_sanar_proj/PATIENT/Screens/LabAppointmentScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/MedicalFilePage.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/SchedulePage.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/SettingPage.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class LabMainScreen extends StatefulWidget {
+  const LabMainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<LabMainScreen> createState() => _LabMainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+class _LabMainScreenState extends State<LabMainScreen> {
+  int _currentIndex = 0; // Active tab index
+
+  // List of screens to navigate between
   final List<Widget> _pages = [
     HomePage(),
-    const SchedulePage(),
-    const MedicalFilePage(),
+    const LabAppointmentPage(),
     const SettingPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: _pages[_currentIndex], // Show the current active page
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
@@ -44,12 +47,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Schedule',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
-            label: 'Medical File',
+            icon: Icon(Icons.time_to_leave),
+            label: 'Appointments',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

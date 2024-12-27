@@ -3,13 +3,16 @@ import 'package:flutter_sanar_proj/PATIENT/Login-Signup/Login-Signup/login.dart'
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_sanar_proj/PATIENT/Login-Signup/Login-Signup/login_signup.dart';
+import 'package:flutter_sanar_proj/PATIENT/Widgets/Colors/colors.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/CustomInputField.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 // import 'medicalRegistration.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PersonalRegistrationPage extends StatefulWidget {
   const PersonalRegistrationPage({super.key});
@@ -20,73 +23,153 @@ class PersonalRegistrationPage extends StatefulWidget {
 }
 
 class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
-  final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _birthDateController = TextEditingController();
-  final _addressController = TextEditingController(); // For address
+  final _addressController = TextEditingController();
   DateTime? _birthDate;
   String? _profilePhoto = '';
   String? _selectedGender;
+  String? _selectedUserType;
 
-  final ImagePicker _picker = ImagePicker();
+  String? file_Type;
+  PlatformFile? selectedFile;
 
-  Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles();
 
-    if (pickedFile != null) {
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.first;
       setState(() {
-        _profilePhoto = pickedFile.path;
+        selectedFile = file;
+        _profilePhoto = file.path;
       });
+      print('Selected file: ${file.path}');
     }
   }
 
-  Future<void> _submitDetails() async {
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match!')),
-      );
+  Map<String, String?> _errors = {
+    "username": null,
+    "full_name": null,
+    "email": null,
+    "phone": null,
+    "password": null,
+    "gender": null,
+    "confirm_password": null,
+  };
+  String? token;
+  Future<void> _submitDetails(PlatformFile file) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('access'); // Get token
+    setState(() {
+      // Clear previous errors
+      _errors = {
+        "username": null,
+        "full_name": null,
+        "email": null,
+        "phone": null,
+        "password": null,
+        "confirm_password": null,
+      };
+    });
+
+    bool isValid = true;
+
+    // Validate Username
+    if (_usernameController.text.isEmpty) {
+      _errors["username"] = "Username is required";
+      isValid = false;
+    }
+
+    // Validate Full Name
+    if (_fullNameController.text.isEmpty) {
+      _errors["full_name"] = "Full Name is required";
+      isValid = false;
+    }
+
+    // Validate Email
+    if (_emailController.text.isEmpty) {
+      _errors["email"] = "Email is required";
+      isValid = false;
+    }
+
+    // Validate Phone
+    if (_phoneController.text.isEmpty) {
+      _errors["phone"] = "Phone number is required";
+      isValid = false;
+    }
+
+    // Validate Password
+    if (_passwordController.text.isEmpty) {
+      _errors["password"] = "Password is required";
+      isValid = false;
+    }
+    if (_selectedGender == null) {
+      _errors["gender"] = "gender is required";
+      isValid = false;
+    }
+
+    // Confirm Password Match
+    if (_confirmPasswordController.text != _passwordController.text) {
+      _errors["confirm_password"] = "Passwords do not match";
+      isValid = false;
+    }
+
+    // If invalid, refresh UI with errors
+    if (!isValid) {
+      setState(() {});
       return;
     }
 
     const String apiUrl = 'http://164.92.111.149/api/users/';
-    const String csrfToken =
-        'xAlrLaDpKciN0UVRkC4S0SOHKoZcKxhkiYLoYAIA3rtmRLpMkhbv9OSgpOEJOOtt';
+    String csrfToken = '${token}';
 
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'X-CSRFTOKEN': csrfToken,
-        },
-        body: jsonEncode({
-          'password': _passwordController.text,
-          'password_confirm': _confirmPasswordController.text, // Add this line
-          'username': _nameController.text,
-          'email': _emailController.text,
-          'full_name': _nameController.text,
-          'phone_number': _phoneController.text,
-          'birth_date': _birthDateController.text,
-          'gender': _selectedGender,
-          'address': _addressController.text, // Added address
-          'profile_image': _profilePhoto, // Added profile image
-          'user_type': 'patient',
-          'is_verified': true,
-          'is_active': true,
-          'is_superuser': false,
-          'is_staff': false,
-        }),
-      );
+      final url = Uri.parse(apiUrl);
+      final request = http.MultipartRequest('POST', url)
+        ..headers['accept'] = 'application/json'
+        ..headers['X-CSRFTOKEN'] = csrfToken
+        ..fields['password'] = _passwordController.text
+        ..fields['password_confirm'] = _confirmPasswordController.text
+        ..fields['username'] = _usernameController.text
+        ..fields['email'] = _emailController.text
+        ..fields['full_name'] = _fullNameController.text
+        ..fields['phone_number'] = _phoneController.text
+        ..fields['birth_date'] = _birthDateController.text
+        ..fields['gender'] = _selectedGender!
+        ..fields['address'] = _addressController.text
+        ..fields['user_type'] = 'patient'
+        ..fields['is_verified'] = 'true'
+        ..fields['is_active'] = 'true'
+        ..fields['is_superuser'] = 'false'
+        ..fields['is_staff'] = 'false'
+        ..files.add(await http.MultipartFile.fromPath(
+          'profile_image',
+          file.path!,
+        ));
 
-      // Log status code and body for debugging
+      final response = await http.Response.fromStream(await request.send());
+
       print('Status Code: ${response.statusCode}');
       print('Response Body: ${response.body}');
 
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      print({
+        "username": _usernameController.text,
+        "email": _emailController.text,
+        "full_name": _fullNameController.text,
+        "phone_number": _phoneController.text,
+        "birth_date": _birthDateController.text,
+        "gender": _selectedGender,
+        "address": _addressController.text,
+        "user_type": _selectedUserType,
+        "image": selectedFile,
+      });
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Success
         ScaffoldMessenger.of(context).showSnackBar(
@@ -99,27 +182,19 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
             ),
           ),
         );
-        Navigator.push(
+        /* Navigator.push(
           context,
           PageTransition(
             type: PageTransitionType.rightToLeft,
             child: const Login(),
           ),
-        );
-        // Navigator.push(
-        //   context,
-        //   PageTransition(
-        //     type: PageTransitionType.rightToLeft,
-        //     child: const MedicalRegistrationPage(),
-        //   ),
-        // );
+        ); */
       } else {
         // Handle API errors
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'User already exists',
-              // 'Error (${response.statusCode}): ${response.body}',
+              'Error (${response.statusCode}): ${response.body}',
               maxLines: 5,
               overflow: TextOverflow.ellipsis,
             ),
@@ -141,18 +216,30 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
     }
   }
 
-  void _selectBirthDate() async {
+  Future<void> _selectBirthDate() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
+      initialDate: DateTime(2000), // Default year
+      firstDate: DateTime(1900), // Start year for birthdate
+      lastDate: DateTime.now(), // End at current year
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.teal, // Header background color
+              onPrimary: Colors.white, // Header text color
+              onSurface: Colors.teal, // Body text color
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (pickedDate != null) {
       setState(() {
         _birthDate = pickedDate;
         _birthDateController.text =
-            DateFormat('yyyy-MM-dd').format(_birthDate!);
+            DateFormat('yyyy-MM-dd').format(_birthDate!); // Format the date
       });
     }
   }
@@ -211,20 +298,77 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
                           : null,
                     ),
                     FloatingActionButton(
-                      onPressed: _pickImage,
+                      onPressed: _pickFile,
                       mini: true,
                       backgroundColor: Colors.teal,
                       child: const Icon(Icons.edit, color: Colors.white),
                     ),
                   ],
                 ),
+                selectedFile != null
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedFile = null;
+                                _profilePhoto = ''; // Remove file
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  color: Colors.teal,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: const Text(
+                                'Remove file',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : GestureDetector(
+                        onTap: _pickFile,
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              color: Colors.teal,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: const Text(
+                            'Add file',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
                 const SizedBox(height: 30),
                 CustomInputField(
-                  controller: _nameController,
-                  labelText: "Name",
+                  controller: _fullNameController,
+                  labelText: "Full Name",
                   hintText: "Enter your Name",
+                  errorText: _errors["full_name"], // Pass error
+
                   keyboardType: TextInputType.name,
                   icon: Icons.person,
+                  inputDecoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.teal.shade50,
+                    labelStyle: TextStyle(color: Colors.teal),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                CustomInputField(
+                  controller: _usernameController,
+                  labelText: "Username",
+                  hintText: "Enter your username",
+                  keyboardType: TextInputType.name,
+                  icon: Icons.person,
+                  errorText: _errors["username"], // Pass error
+
                   inputDecoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.teal.shade50,
@@ -240,6 +384,8 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
                   controller: _emailController,
                   labelText: "Email",
                   hintText: "Enter your Email",
+                  errorText: _errors["email"], // Pass error
+
                   keyboardType: TextInputType.emailAddress,
                   icon: Icons.email,
                   inputDecoration: InputDecoration(
@@ -258,6 +404,8 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
                   labelText: "Phone",
                   hintText: "Enter your Phone Number",
                   keyboardType: TextInputType.phone,
+                  errorText: _errors["phone"], // Pass error
+
                   icon: Icons.phone,
                   inputDecoration: InputDecoration(
                     filled: true,
@@ -273,6 +421,8 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
                 CustomInputField(
                   controller: _passwordController,
                   labelText: "Password",
+                  errorText: _errors["password"], // Pass error
+
                   hintText: "Enter your Password",
                   obscureText: true,
                   icon: Icons.lock,
@@ -292,6 +442,8 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
                   labelText: "Confirm Password",
                   hintText: "Confirm your Password",
                   obscureText: true,
+                  errorText: _errors["confirm_password"], // Pass error
+
                   icon: Icons.lock,
                   inputDecoration: InputDecoration(
                     filled: true,
@@ -318,7 +470,7 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  onTap: _selectBirthDate,
+                  onTap: () => _selectBirthDate(),
                 ),
                 const SizedBox(height: 15),
                 DropdownButtonFormField<String>(
@@ -346,9 +498,39 @@ class _PersonalRegistrationPageState extends State<PersonalRegistrationPage> {
                         const Icon(Icons.transgender, color: Colors.teal),
                   ),
                 ),
+                const SizedBox(height: 15),
+                DropdownButtonFormField<String>(
+                  value: _selectedUserType,
+                  items: const [
+                    DropdownMenuItem(value: 'patient', child: Text('patient')),
+                    DropdownMenuItem(value: 'nurse', child: Text('nurse')),
+                    DropdownMenuItem(value: 'lab', child: Text('lab')),
+                    DropdownMenuItem(value: 'admin', child: Text('admin')),
+                    DropdownMenuItem(
+                        value: 'hospital', child: Text('hospital')),
+                    DropdownMenuItem(value: 'doctor', child: Text('doctor')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedUserType = value!;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'UserType',
+                    filled: true,
+                    fillColor: Colors.teal.shade50,
+                    labelStyle: TextStyle(color: Colors.teal),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    /*  prefixIcon:
+                        const Icon(Icons.type, color: Colors.teal), */
+                  ),
+                ),
                 const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: _submitDetails,
+                  onPressed: () => _submitDetails(selectedFile!),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
                     shape: RoundedRectangleBorder(

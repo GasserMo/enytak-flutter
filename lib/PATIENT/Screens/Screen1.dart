@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_bottomNAVbar.dart';
+import 'package:flutter_sanar_proj/STTAFF/Widgets/Lab_bottom_navbar.dart';
 import 'package:flutter_sanar_proj/STTAFF/Widgets/customDoctor_bottomNAVbar.dart';
 import 'package:flutter_sanar_proj/STTAFF/Widgets/customNurse_bottomNAVbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,12 +65,28 @@ class _Screen1State extends State<Screen1> with SingleTickerProviderStateMixin {
             child: const MainScreen(),
           ),
         );
+      } else if (userType == 'hosptial') {
+        Navigator.pushReplacement(
+          context,
+          PageTransition(
+            type: PageTransitionType.rightToLeft,
+            child: const MainScreen(),
+          ),
+        );
       } else if (userType == 'nurse') {
         Navigator.pushReplacement(
           context,
           PageTransition(
             type: PageTransitionType.rightToLeft,
             child: const StaffNurseMainScreen(),
+          ),
+        );
+      } else if (userType == 'lab') {
+        Navigator.pushReplacement(
+          context,
+          PageTransition(
+            type: PageTransitionType.rightToLeft,
+            child: const LabMainScreen(),
           ),
         );
       }

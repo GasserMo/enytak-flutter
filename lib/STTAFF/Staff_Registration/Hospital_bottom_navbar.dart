@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/AppointmentScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/HomeScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/MedicalFilePage.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/SchedulePage.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/SettingPage.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class HospitalMainScreen extends StatefulWidget {
+  const HospitalMainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<HospitalMainScreen> createState() => _HospitalMainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+class _HospitalMainScreenState extends State<HospitalMainScreen> {
+  int _currentIndex = 0; // Active tab index
+
+  // List of screens to navigate between
   final List<Widget> _pages = [
     HomePage(),
-    const SchedulePage(),
+/*     const SchedulePage(),
+ */
+    const AppointmentPage(),
     const MedicalFilePage(),
     const SettingPage(),
   ];
@@ -43,9 +48,13 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          /*  BottomNavigationBarItem(
             icon: Icon(Icons.schedule),
             label: 'Schedule',
+          ), */
+          BottomNavigationBarItem(
+            icon: Icon(Icons.time_to_leave),
+            label: 'Appointments',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.folder),

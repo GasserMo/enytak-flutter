@@ -38,14 +38,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
-          'accept': 'application/json',
+          'accept': 'application/json; charset=utf-8',
           'Authorization': 'Bearer $token',
         },
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          userData = json.decode(response.body);
+          userData = json.decode(utf8.decode(response.bodyBytes));
         });
       } else {
         String errorMsg =
@@ -86,6 +86,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () => {Navigator.pop(context)},
+            icon: Icon(Icons.arrow_back)),
         title: const Text('User Profile'),
         backgroundColor: Colors.teal,
       ),

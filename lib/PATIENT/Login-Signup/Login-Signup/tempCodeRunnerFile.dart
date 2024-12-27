@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_sanar_proj/PATIENT/Screens/password_reset.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_bottomNAVbar.dart';
-import 'package:flutter_sanar_proj/STTAFF/Staff_Registration/Hospital_bottom_navbar.dart';
-import 'package:flutter_sanar_proj/STTAFF/Widgets/Lab_bottom_navbar.dart';
 import 'package:flutter_sanar_proj/STTAFF/Widgets/customDoctor_bottomNAVbar.dart';
 import 'package:flutter_sanar_proj/STTAFF/Widgets/customNurse_bottomNAVbar.dart';
 import 'package:http/http.dart' as http;
@@ -46,7 +43,7 @@ class _LoginState extends State<Login> {
 
     try {
       final response = await http.post(url, headers: headers, body: body);
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
         final token = responseBody['access'];
         final userId = responseBody['user']['id'];
@@ -92,7 +89,7 @@ class _LoginState extends State<Login> {
             context,
             PageTransition(
               type: PageTransitionType.rightToLeft,
-              child: const HospitalMainScreen(),
+              child: const MainScreen(),
             ),
           );
         } else if (userType == 'nurse') {
@@ -103,17 +100,8 @@ class _LoginState extends State<Login> {
               child: const StaffNurseMainScreen(),
             ),
           );
-        } else if (userType == 'lab') {
-          Navigator.pushReplacement(
-            context,
-            PageTransition(
-              type: PageTransitionType.rightToLeft,
-              child: const LabMainScreen(),
-            ),
-          );
         }
       } else {
-        print(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login failed. Check credentials.")),
         );
@@ -223,59 +211,23 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.04),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        width: screenWidth * 0.4,
-                        height: screenHeight * 0.04,
-                        child: ElevatedButton(
-                          onPressed: handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            "Log In",
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                        ),
+                SizedBox(
+                  width: screenWidth * 0.5,
+                  height: screenHeight * 0.08,
+                  child: ElevatedButton(
+                    onPressed: handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    SizedBox(
-                      width: 10,
+                    child: const Text(
+                      "Log In",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
-                    /*  Expanded(
-                      child: SizedBox(
-                        width: screenWidth * 0.4,
-                        height: screenHeight * 0.04,
-                        child: ElevatedButton(
-                          onPressed: () => {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PasswordResetPage(),
-                              ),
-                            )
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            "Reset password",
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ), */
-                  ],
-                )
+                  ),
+                ),
               ],
             ),
           ),

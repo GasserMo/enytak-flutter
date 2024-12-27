@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/Map_Service/Service.dart';
+import 'package:flutter_sanar_proj/PATIENT/Screens/ServiceScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Staff_List/DoctorListScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Staff_List/LaboratoryScreen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,11 +10,16 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleMapScreen extends StatefulWidget {
-  final String serviceName;
+  final List<dynamic> serviceIds;
+  final int categoryId;
   final String servicePhotoUrl = "assets/icons/appoint.png";
   final String serviceDescription = "This is an example service description.";
 
-  const GoogleMapScreen({super.key, required this.serviceName});
+  const GoogleMapScreen({
+    super.key,
+    required this.categoryId,
+    required this.serviceIds,
+  });
 
   @override
   State<GoogleMapScreen> createState() => _GoogleMapScreenState();
@@ -26,6 +32,25 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   bool _loadingLocation = false;
 
   // Get current user location
+  Future<List<Map<String, dynamic>>> fetchServicesByIds(
+      List<int> serviceIds) async {
+    final List<Map<String, dynamic>> services = [];
+    for (int serviceId in serviceIds) {
+      final url = Uri.parse('http://164.92.111.149/api/services/$serviceId/');
+      final response = await http.get(url, headers: {
+        'accept': 'application/json',
+        'X-CSRFTOKEN':
+            'TBnER2Sd30Nom2fNH40WwVJoMEWWyJsEEZNB4sXomfYXdTJIHJ7zFRNXr4BtC0EN',
+      });
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        services.add(data);
+      }
+    }
+    return services;
+  }
+
   Future<void> _getUserLocation() async {
     setState(() {
       _loadingLocation = true;
@@ -190,6 +215,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         // Fetch service categories to determine navigation
         print(subcategoryIds);
         print(serviceIds);
+        print('category id +${widget.categoryId}');
 
         if (subcategoryIds.isEmpty && serviceIds.isEmpty) {
           Navigator.push(
@@ -227,7 +253,9 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DoctorListScreen(),
+              builder: (context) => ServiceScreen(
+                categoryId: widget.categoryId,
+              ),
             ),
           );
         } else {
@@ -289,6 +317,9 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('${widget.categoryId}'),
+      ),
       body: Stack(
         children: [
           GoogleMap(

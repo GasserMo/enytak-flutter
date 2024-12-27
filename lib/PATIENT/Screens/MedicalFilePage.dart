@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sanar_proj/PATIENT/Screens/MedicalReports.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_AppBar.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/MedicalFileDetails.dart';
 
@@ -16,16 +17,6 @@ class MedicalFilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with patient information
-            // Text(
-            //   'Patient: John Doe', // Replace with dynamic data if necessary
-            //   style: TextStyle(
-            //     fontSize: 22,
-            //     fontWeight: FontWeight.bold,
-            //     color: Colors.teal[700], // Dark teal color
-            //     letterSpacing: 1.5,
-            //   ),
-            // ),
             const SizedBox(height: 20),
             // Grid of medical files with customized card design
             Expanded(
@@ -51,43 +42,16 @@ class MedicalFilePage extends StatelessWidget {
 
   Widget _buildMedicalFileItem(BuildContext context, int index) {
     final items = [
-      {
-        'icon': Icons.check_circle,
-        'name': 'Lab Results'
-      }, // Icon for Lab Results
-      {
-        'icon': Icons.medical_services,
-        'name': 'Medicine Prescriptions'
-      }, // Icon for Medicine Prescriptions
-      {
-        'icon': Icons.vaccines,
-        'name': 'Vaccination Reports'
-      }, // Icon for Vaccination Reports
-      {
-        'icon': Icons.report_problem,
-        'name': 'Case Report'
-      }, // Icon for Case Report
-      {
-        'icon': Icons.airline_seat_individual_suite,
-        'name': 'Sick Leave'
-      }, // Icon for Sick Leave
-      {'icon': Icons.assignment, 'name': 'My Programs'}, // Icon for My Programs
-      {
-        'icon': Icons.receipt_long,
-        'name': 'Medical Reports'
-      }, // Icon for Medical Reports
-      {
-        'icon': Icons.person,
-        'name': 'Health Profile'
-      }, // Icon for Health Profile
-      {
-        'icon': Icons.fitness_center,
-        'name': 'Life Style'
-      }, // Icon for Life Style
-      {
-        'icon': Icons.local_hospital,
-        'name': 'Insurance Approval'
-      }, // Icon for Insurance Approval
+      {'icon': Icons.check_circle, 'name': 'Lab Results'},
+      {'icon': Icons.medical_services, 'name': 'Medicine Prescriptions'},
+      {'icon': Icons.vaccines, 'name': 'Vaccination Reports'},
+      {'icon': Icons.report_problem, 'name': 'Case Report'},
+      {'icon': Icons.airline_seat_individual_suite, 'name': 'Sick Leave'},
+      {'icon': Icons.assignment, 'name': 'My Programs'},
+      {'icon': Icons.receipt_long, 'name': 'Medical Reports'},
+      {'icon': Icons.person, 'name': 'Health Profile'},
+      {'icon': Icons.fitness_center, 'name': 'Life Style'},
+      {'icon': Icons.local_hospital, 'name': 'Insurance Approval'},
     ];
 
     final item = items[index];
@@ -101,14 +65,25 @@ class MedicalFilePage extends StatelessWidget {
       color: Colors.white,
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MedicalFileDetails(
-                itemName: item['name'] as String,
+          if (item['name'] == 'Medical Reports') {
+            // Navigate to MedicalReportsPage when "Medical Reports" is clicked
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MedicalReportsPage(),
               ),
-            ),
-          );
+            );
+          } else {
+            // Navigate to MedicalFileDetails for other items
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MedicalFileDetails(
+                  itemName: item['name'] as String,
+                ),
+              ),
+            );
+          }
         },
         splashColor: Colors.teal.withOpacity(0.2),
         borderRadius: BorderRadius.circular(15),

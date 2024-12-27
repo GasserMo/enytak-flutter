@@ -11,6 +11,7 @@ class CustomInputField extends StatelessWidget {
   final VoidCallback? onTap;
   final String? hintText;
   final double? height;
+  final String? errorText; // New property for error messages
 
   const CustomInputField({
     super.key,
@@ -21,13 +22,15 @@ class CustomInputField extends StatelessWidget {
     required this.icon,
     this.onTap,
     this.hintText,
-    this.height, required InputDecoration inputDecoration,
+    this.height,
+    this.errorText,
+    required InputDecoration inputDecoration,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height:MediaQuery.of(context).size.height * 0.1,
+      height: MediaQuery.of(context).size.height * 0.1,
       width: MediaQuery.of(context).size.width * 0.9,
       child: TextField(
         controller: controller,
@@ -52,6 +55,8 @@ class CustomInputField extends StatelessWidget {
             color: const Color.fromARGB(255, 37, 37, 37),
           ),
           hintText: hintText,
+          errorText: errorText, // Show error text if provided
+
           hintStyle: GoogleFonts.inter(
             fontSize: 16.sp,
             fontWeight: FontWeight.normal,
@@ -61,6 +66,14 @@ class CustomInputField extends StatelessWidget {
           border: OutlineInputBorder(
             borderSide: BorderSide.none,
             borderRadius: BorderRadius.circular(15),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.red, width: 1.5),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(color: Colors.red, width: 1.5),
           ),
           contentPadding: EdgeInsets.symmetric(
             vertical: height ?? 20,

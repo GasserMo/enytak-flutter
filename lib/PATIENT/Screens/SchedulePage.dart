@@ -33,14 +33,14 @@ class _SchedulePageState extends State<SchedulePage> {
         Uri.parse(
             'http://164.92.111.149/api/users/$userId/appointments/?page=1'),
         headers: {
-          'accept': 'application/json',
+          'accept': 'application/json; charset=utf-8',
           'X-CSRFTOKEN':
               'nBu98iMSXQUHWNabH8k7LLALqEPDzjQVmeBE9u7XssKYmYnL1hmvmJ8qRXOAfQ0u',
         },
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         setState(() {
           allAppointments = data['results'];
           isLoading = false;

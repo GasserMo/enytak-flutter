@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
             '/Login_Signup': (context) => const LoginSignup(),
             '/Login': (context) => const Login(),
             '/HomePage': (context) => HomePage(),
+            '/AppointmentDetailsScreen': (context) => HomePage(),
             '/MainScreen': (context) => const MainScreen(),
             '/UserProfileScreen': (context) => const UserProfileScreen(),
             '/StaffSelectionScreen': (context) => const StaffSelectionScreen(),

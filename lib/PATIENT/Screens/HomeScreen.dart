@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_sanar_proj/PATIENT/Screens/ServiceScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/StaffDetails/doctor_details.dart';
 import 'package:flutter_sanar_proj/PATIENT/StaffDetails/nurse_details.dart';
 import 'package:flutter_sanar_proj/PATIENT/Staff_List/DoctorListScreen.dart';
@@ -20,9 +21,14 @@ List<Map<String, dynamic>> serviceIcons = [
   {'id': 8, 'icon': Icons.home, 'name': 'Home Maintenance'},
 ];
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   IconData _getServiceIcon(int serviceId) {
     final iconEntry = serviceIcons.firstWhere(
       (entry) => entry['id'] == serviceId,
@@ -31,20 +37,26 @@ class HomePage extends StatelessWidget {
     return iconEntry['icon'] as IconData;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    labsFuture = fetchTopRatedLabs();
+  }
+
   // Fetch Services
-  Future<List<Map<String, dynamic>>> fetchServices() async {
+  Future<List<Map<String, dynamic>>> fetchServicesCategories() async {
     final url = Uri.parse('http://164.92.111.149/api/service-categories/');
     final response = await http.get(
       url,
       headers: {
-        'accept': 'application/json',
+        'accept': 'application/json; charset=utf-8',
         'X-CSRFTOKEN':
             'TBnER2Sd30Nom2fNH40WwVJoMEWWyJsEEZNB4sXomfYXdTJIHJ7zFRNXr4BtC0EN',
       },
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       final results = data['results'] as List;
 
       return results.map((service) {
@@ -54,12 +66,39 @@ class HomePage extends StatelessWidget {
           'description': service['description'] ?? '',
           'image': service['image'] ?? '',
           'subcategory_ids': service['subcategory_ids'] ?? [],
-          'service_ids': service['service_ids'] ?? [],
+          'service_ids': service['service_ids'] ?? [], // Service ids as objects
         };
       }).toList();
     } else {
       throw Exception('Failed to load services');
     }
+  }
+
+  late Future<List<Map<String, dynamic>>> labsFuture;
+
+  Future<List<Map<String, dynamic>>> fetchServicesByIds(
+      List<int> serviceIds) async {
+    final List<Map<String, dynamic>> services = [];
+
+    for (var service in serviceIds) {
+      final serviceId = service; // Get the service id from the map
+      final url = Uri.parse('http://164.92.111.149/api/services/$serviceId/');
+      final response = await http.get(
+        url,
+        headers: {
+          'accept': 'application/json',
+          'X-CSRFTOKEN':
+              'TBnER2Sd30Nom2fNH40WwVJoMEWWyJsEEZNB4sXomfYXdTJIHJ7zFRNXr4BtC0EN',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        services.add(data); // Add the response data to the services list
+      }
+    }
+
+    return services;
   }
 
   // Fetch Doctors
@@ -159,6 +198,85 @@ class HomePage extends StatelessWidget {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchHospitals() async {
+    final url = Uri.parse('http://164.92.111.149/api/hospitals/');
+    final response = await http.get(
+      url,
+      headers: {
+        'accept': 'application/json',
+        'X-CSRFTOKEN':
+            'TBnER2Sd30Nom2fNH40WwVJoMEWWyJsEEZNB4sXomfYXdTJIHJ7zFRNXr4BtC0EN',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = data['results'] as List;
+
+      return results.map((nurse) {
+        return {
+          'id': nurse['id'],
+          'photo': nurse['personal_photo'] ?? 'assets/images/placeholder.png',
+          'name': nurse['bio'] ?? 'Unknown Nurse',
+          'specialization':
+              nurse['specializations']?.join(', ') ?? 'No specialization',
+          'rating': nurse['average_rating'] ?? 0.0,
+          'description': nurse['bio'] ?? 'No bio available',
+          'certifications':
+              nurse['certifications'] ?? 'No certifications available',
+          'years_of_experience': nurse['years_of_experience'] ?? 'Not provided',
+          'city': nurse['city'] ?? 'Unknown City',
+          'region': nurse['region'] ?? 'Unknown Region',
+          'degree': nurse['degree'] ?? 'Not provided',
+          'classification': nurse['classification'] ?? 'Not provided',
+          'id_card_image':
+              nurse['id_card_image'] ?? 'No ID card image available',
+          'verification_status': nurse['verification_status'] ?? 'Not verified',
+          'hospital': nurse['hospital'] ?? 'Not associated with a hospital',
+          'services': nurse['services'] ?? [],
+        };
+      }).toList();
+    } else {
+      throw Exception('Failed to load nurses');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchTopRatedLabs() async {
+    const String url = 'http://164.92.111.149/api/labs/';
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'accept': 'application/json; charset=utf-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data =
+            json.decode(utf8.decode(response.bodyBytes));
+
+        // Extract the labs from the response
+        final List labs = data['results'];
+
+        // Filter for active labs with ratings > 0 and sort by average_rating (descending)
+        final sortedLabs = labs
+            .where((lab) =>
+                lab['is_active'] == true && lab['average_rating'] != null)
+            .toList()
+          ..sort((a, b) => b['average_rating'].compareTo(a['average_rating']));
+
+        return sortedLabs.cast<Map<String, dynamic>>();
+      } else {
+        throw Exception(
+            'Failed to fetch labs. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching labs: $e');
+      return [];
+    }
+  }
+
   // Save doctor ID in SharedPreferences
   Future<void> saveDoctorId(int doctorId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -173,13 +291,6 @@ class HomePage extends StatelessWidget {
   }
 
 // // Save user ID in SharedPreferences
-//   Future<void> saveUserId(int userdoctorId) async {
-//     final prefs = await SharedPreferences.getInstance();
-//     await prefs.setInt('user', userdoctorId);
-//     print('Saved userdoctorID: $userdoctorId');
-//   }
-
-  // Save service ID in SharedPreferences
   Future<void> saveServiceId(int serviceId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('serviceId', serviceId);
@@ -207,7 +318,7 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 16),
               FutureBuilder<List<Map<String, dynamic>>>(
                 // Services FutureBuilder
-                future: fetchServices(),
+                future: fetchServicesCategories(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return _buildServiceShimmerEffect(); // Show shimmer effect
@@ -235,18 +346,54 @@ class HomePage extends StatelessWidget {
                       final service = services[index];
                       return GestureDetector(
                         onTap: () async {
-                          // Save service ID to SharedPreferences
-                          await saveServiceId(service['id']);
+                          final categoryId =
+                              service['id']; // The selected category ID
+                          final serviceIds = service['service_ids'];
 
-                          // Navigate to GoogleMapScreen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GoogleMapScreen(
-                                serviceName: service['name'],
+                          // Save the category ID to SharedPreferences
+                          await saveServiceId(categoryId);
+                          if (service['subcategory_ids'] == null ||
+                              service['subcategory_ids'].isEmpty) {
+                            // Extract just the IDs from service_ids (assuming it's a list of maps)
+                            final ids = serviceIds
+                                .map<int>((service) => service['id'] as int)
+                                .toList();
+                            print(ids);
+
+                            // Fetch services by IDs
+                            final services = await fetchServicesByIds(ids);
+
+                            if (services.isNotEmpty) {
+                              // Navigate to Service Screen and display the fetched services
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GoogleMapScreen(
+                                    serviceIds: ids,
+                                    categoryId: categoryId,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              // Show message if no services are found
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'No services available for this category.')),
+                              );
+                            }
+                          } else {
+                            // Navigate to Google Map Screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GoogleMapScreen(
+                                  serviceIds: serviceIds,
+                                  categoryId: categoryId,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -491,6 +638,125 @@ class HomePage extends StatelessWidget {
                                         style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Top-Rated Labs',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black)),
+                  const SizedBox(height: 16),
+                ],
+              ),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: fetchTopRatedLabs(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildDoctorShimmerEffect(); // Show shimmer effect
+                  } else if (snapshot.hasError) {
+                    return const Center(
+                        child: Text(
+                      'Failed to load labs',
+                      style: TextStyle(color: Colors.red),
+                    ));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                        child: Text('No top-rated labs available',
+                            style: TextStyle(color: Colors.grey)));
+                  }
+
+                  final labs = snapshot.data!;
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: labs.map((lab) {
+                        return GestureDetector(
+                          onTap: () async {
+                            // Handle lab click (e.g., navigate to details)
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 16),
+                            width: 150,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  blurRadius: 5,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Lab Image
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: lab['license_document'] != null
+                                      ? Image.network(
+                                          lab['license_document'],
+                                          height: 90,
+                                          width: 90,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Container(
+                                          height: 90,
+                                          width: 90,
+                                          color: Colors.grey[300],
+                                          child: const Icon(
+                                            Icons.image_not_supported,
+                                            size: 40,
+                                            color: Colors.teal,
+                                          ),
+                                        ),
+                                ),
+                                const SizedBox(height: 8),
+                                // Lab Name
+                                Text(
+                                  lab['name'] ?? 'Unnamed Lab',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                // Lab Specialization
+
+                                const SizedBox(height: 8),
+                                // Lab Rating
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      lab['average_rating']
+                                              ?.toStringAsFixed(1) ??
+                                          '0.0',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sanar_proj/PATIENT/User_Profile/Hospital_user_profile.dart';
+import 'package:flutter_sanar_proj/PATIENT/User_Profile/lab_user_profile.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_AppBar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -15,8 +18,27 @@ class SettingPage extends StatelessWidget {
           // Profile Section
           _buildCard(
               child: GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/UserProfileScreen');
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              final userType =
+                  prefs.getString('user_type'); // Retrieve userType from prefs
+
+              if (userType == 'hospital') {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const HospitalUserProfile()),
+                );
+              } else if (userType == 'lab') {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const LabUserProfile()),
+                );
+              } else {
+                Navigator.pushNamed(
+                    context, '/UserProfileScreen'); // Default route
+              }
             },
             child: const Row(
               children: [

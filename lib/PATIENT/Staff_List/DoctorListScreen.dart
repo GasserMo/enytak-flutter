@@ -28,14 +28,14 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
     final response = await http.get(
       url,
       headers: {
-        'accept': 'application/json',
+        'accept': 'application/json; charset=utf-8',
         'X-CSRFTOKEN':
             'TBnER2Sd30Nom2fNH40WwVJoMEWWyJsEEZNB4sXomfYXdTJIHJ7zFRNXr4BtC0EN',
       },
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       final results = data['results'] as List;
 
       return results.map((doctor) {
