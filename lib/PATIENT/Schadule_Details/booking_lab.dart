@@ -217,6 +217,7 @@ class _ScheduleLabScreenState extends State<ScheduleLabScreen> {
         );
 
         if (response.statusCode == 201) {
+          print(response.body);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Appointment successfully booked!'),
@@ -340,48 +341,70 @@ class _ScheduleLabScreenState extends State<ScheduleLabScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // 4 columns for the grid
+                  crossAxisCount: 4, // Adjust the number of slots per row
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
-                itemCount: availableSlots.length,
+                itemCount: availableSlots.fold<int>(0, (sum, slot) {
+                  // Calculate total 30-minute intervals across all available slots
+                  DateTime start =
+                      DateFormat('HH:mm').parse(slot['start_time']);
+                  DateTime end = DateFormat('HH:mm').parse(slot['end_time']);
+
+                  int intervalCount = 0;
+                  while (start.isBefore(end)) {
+                    intervalCount++;
+                    start = start.add(const Duration(minutes: 30));
+                  }
+                  return sum +
+                      intervalCount; // Add the number of 30-minute intervals
+                }),
                 itemBuilder: (context, index) {
-                  final slot = availableSlots[index];
-                  final startTime = TimeOfDay(
-                    hour: int.parse(slot['start_time'].split(':')[0]),
-                    minute: int.parse(slot['start_time'].split(':')[1]),
-                  );
-                  final endTime = TimeOfDay(
-                    hour: int.parse(slot['end_time'].split(':')[0]),
-                    minute: int.parse(slot['end_time'].split(':')[1]),
-                  );
+                  // Flatten the list of slots into individual 30-minute intervals
+                  List<TimeOfDay> halfHourSlots = [];
+                  for (var slot in availableSlots) {
+                    DateTime start =
+                        DateFormat('HH:mm').parse(slot['start_time']);
+                    DateTime end = DateFormat('HH:mm').parse(slot['end_time']);
+
+                    while (start.isBefore(end)) {
+                      halfHourSlots.add(
+                          TimeOfDay(hour: start.hour, minute: start.minute));
+                      start = start.add(const Duration(
+                          minutes: 30)); // Add 30 minutes for each slot
+                    }
+                  }
+
+                  // Get the current slot for the grid item
+                  final timeSlot = halfHourSlots[index];
+
+                  // Check if this slot is selected
+                  final bool isSelected = selectedSlotTime == timeSlot;
 
                   return GestureDetector(
-                    onTap: () =>
-                        _onTimeSelected(startTime), // Select the start time
+                    onTap: () {
+                      _onTimeSelected(
+                          timeSlot); // Update the selected slot time
+                    },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       decoration: BoxDecoration(
-                        color: selectedTime == startTime
-                            ? primaryColor
-                            : Colors.grey[300],
+                        color: isSelected ? Colors.teal : Colors.grey[300],
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
-                          if (selectedTime == startTime)
+                          if (isSelected)
                             BoxShadow(
-                              color: primaryColor.withOpacity(0.4),
+                              color: Colors.teal.withOpacity(0.4),
                               spreadRadius: 3,
                               blurRadius: 6,
-                            ),
+                            )
                         ],
                       ),
                       child: Center(
                         child: Text(
-                          '${startTime.format(context)}', // Display the time range
+                          '${timeSlot.format(context)}',
                           style: TextStyle(
-                            color: selectedTime == startTime
-                                ? Colors.white
-                                : Colors.black,
+                            color: isSelected ? Colors.white : Colors.black,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

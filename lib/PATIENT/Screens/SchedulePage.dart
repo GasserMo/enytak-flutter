@@ -13,10 +13,23 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  String selectedStatus = 'booking'; // Default status
+  String selectedStatus = 'booked'; // Default status
   List<dynamic> allAppointments = [];
   bool isLoading = true; // Show loading spinner during API call
   String errorMessage = ''; // To hold error messages
+
+  // Status Choices (English Labels)
+  final List<Map<String, String>> STATUS_CHOICES = [
+    {'key': 'booked', 'label': 'Booked'},
+    {'key': 'confirmed', 'label': 'Confirmed'},
+    {'key': 'in_progress', 'label': 'In Progress'},
+    {'key': 'completed', 'label': 'Completed'},
+    {'key': 'dispatched', 'label': 'Dispatched'},
+    {'key': 'delivered', 'label': 'Delivered'},
+    {'key': 'cancelled', 'label': 'Cancelled'},
+    {'key': 'pending', 'label': 'Pending'},
+    {'key': 'rejected', 'label': 'Rejected'},
+  ];
 
   @override
   void initState() {
@@ -79,58 +92,45 @@ class _SchedulePageState extends State<SchedulePage> {
                   child: Column(
                     children: [
                       // Toggle Buttons for Status
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedStatus = 'booked';
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: selectedStatus == 'booked'
-                                  ? Colors.teal
-                                  : Colors.grey[300],
-                            ),
-                            child: const Text('Booking',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedStatus = 'confirmed';
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: selectedStatus == 'confirmed'
-                                  ? Colors.teal
-                                  : Colors.grey[300],
-                            ),
-                            child: const Text('Confirmed',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedStatus = 'cancelled';
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: selectedStatus == 'cancelled'
-                                  ? Colors.teal
-                                  : Colors.grey[300],
-                            ),
-                            child: const Text('cancelled',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                        ],
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: STATUS_CHOICES.map((status) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedStatus = status['key']!;
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      selectedStatus == status['key']
+                                          ? Colors.teal
+                                          : Colors.grey[300],
+                                ),
+                                child: Text(
+                                  status['label']!,
+                                  style: TextStyle(
+                                    color: selectedStatus == status['key']
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       // Appointments List
                       Expanded(
                         child: filteredAppointments.isEmpty
-                            ? const Center(child: Text('Select your status.'))
+                            ? const Center(
+                                child: Text('No appointments found.'),
+                              )
                             : ListView.builder(
                                 itemCount: filteredAppointments.length,
                                 itemBuilder: (context, index) {
@@ -144,8 +144,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                           MaterialPageRoute(
                                             builder: (context) =>
                                                 AppointmentDetailsScreen(
-                                              appointmentId: appointment[
-                                                  'id'], // Pass the appointment ID
+                                              appointmentId: appointment['id'],
                                             ),
                                           ));
                                     },

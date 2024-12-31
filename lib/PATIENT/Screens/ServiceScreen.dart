@@ -114,10 +114,110 @@ class _ServiceScreenState extends State<ServiceScreen> {
           'accept': 'application/json; charset=utf-8',
         },
       );
-      if (serviceResponse.statusCode == 200) {
+      if (serviceResponse.statusCode == 200 ||
+          serviceResponse.statusCode == 201) {
         final service = json.decode(utf8.decode(serviceResponse.bodyBytes));
+
+        // Initialize variable for userId (this could be a lab, hospital, doctor, or nurse)
+        int? userId;
+        int? labId;
+        int? doctorId;
+        int? hospitalId;
+        int? nurseId;
+
+        // Check the service's provider_info to determine if it's linked to a lab, doctor, hospital, or nurse
+        if (service['provider_info'] != null &&
+            service['provider_info'].isNotEmpty) {
+          for (var provider in service['provider_info']) {
+            if (provider['type'] == 'lab') {
+              labId = provider['id'];
+              break; // Exit the loop once we find the first provider
+            } else if (provider['type'] == 'doctor') {
+              doctorId = provider['id'];
+              break; // Exit the loop once we find the first provider
+            } else if (provider['type'] == 'hospital') {
+              hospitalId = provider['id'];
+              break; // Exit the loop once we find the first provider
+            } else if (provider['type'] == 'nurse') {
+              nurseId = provider['id'];
+              break; // Exit the loop once we find the first provider
+            }
+          }
+        }
+
+        // Fetch the userId based on the provider type
+        if (labId != null) {
+          final labResponse = await http.get(
+            Uri.parse('http://164.92.111.149/api/labs/$labId/'),
+            headers: {
+              'accept': 'application/json; charset=utf-8',
+            },
+          );
+          if (labResponse.statusCode == 200 || labResponse.statusCode == 201) {
+            final lab = json.decode(utf8.decode(labResponse.bodyBytes));
+            userId = lab['user']; // Fetch the userId from lab data
+          }
+        } else if (doctorId != null) {
+          final doctorResponse = await http.get(
+            Uri.parse('http://164.92.111.149/api/doctors/$doctorId/'),
+            headers: {
+              'accept': 'application/json; charset=utf-8',
+            },
+          );
+          if (doctorResponse.statusCode == 200 ||
+              doctorResponse.statusCode == 201) {
+            final doctor = json.decode(utf8.decode(doctorResponse.bodyBytes));
+            userId = doctor['user']; // Fetch the userId from doctor data
+          }
+        } else if (hospitalId != null) {
+          final hospitalResponse = await http.get(
+            Uri.parse('http://164.92.111.149/api/hospitals/$hospitalId/'),
+            headers: {
+              'accept': 'application/json; charset=utf-8',
+            },
+          );
+          if (hospitalResponse.statusCode == 200 ||
+              hospitalResponse.statusCode == 201) {
+            final hospital =
+                json.decode(utf8.decode(hospitalResponse.bodyBytes));
+            userId = hospital['user']; // Fetch the userId from hospital data
+          }
+        } else if (nurseId != null) {
+          final nurseResponse = await http.get(
+            Uri.parse('http://164.92.111.149/api/nurses/$nurseId/'),
+            headers: {
+              'accept': 'application/json; charset=utf-8',
+            },
+          );
+          if (nurseResponse.statusCode == 200 ||
+              nurseResponse.statusCode == 201) {
+            final nurse = json.decode(utf8.decode(nurseResponse.bodyBytes));
+            userId = nurse['user']; // Fetch the userId from nurse data
+          }
+        }
+
+        // If we found a valid userId, fetch the user's profile image
+        if (userId != null) {
+          final userResponse = await http.get(
+            Uri.parse('http://164.92.111.149/api/users/$userId/'),
+            headers: {
+              'accept': 'application/json; charset=utf-8',
+            },
+          );
+
+          if (userResponse.statusCode == 200 ||
+              userResponse.statusCode == 201) {
+            final user = json.decode(utf8.decode(userResponse.bodyBytes));
+
+            setState(() {
+              service['profile_image'] =
+                  user['profile_image']; // Save profile_image URL
+            });
+          }
+        }
+
         setState(() {
-          services.add(service);
+          services.add(service); // Add the service to the list
         });
       }
     }
@@ -237,15 +337,16 @@ class _ServiceScreenState extends State<ServiceScreen> {
                       leading: CircleAvatar(
                         radius: 20,
                         backgroundColor: Colors.grey[300],
-                        backgroundImage: service['image'] != null &&
-                                service['image'].isNotEmpty
-                            ? NetworkImage(service['image'])
-                            : null, // Use the image if it's available
-                        child: service['image'] == null ||
-                                service['image'].isEmpty
+                        backgroundImage: service['profile_image'] != null &&
+                                service['profile_image'].isNotEmpty
+                            ? NetworkImage(service[
+                                'profile_image']) // Display profile image if available
+                            : null,
+                        child: service['profile_image'] == null ||
+                                service['profile_image'].isEmpty
                             ? const Icon(Icons.image,
                                 size: 20, color: Colors.teal)
-                            : null, // Show icon if no image is available// No child if there's a valid image
+                            : null, // Show icon if no image is available
                       ),
                       title: Text(
                         service['name'] ??

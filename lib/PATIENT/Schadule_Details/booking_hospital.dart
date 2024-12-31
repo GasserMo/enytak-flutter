@@ -358,29 +358,30 @@ class _ScheduleHospitalScreenState extends State<ScheduleHospitalScreen> {
                   mainAxisSpacing: 12,
                 ),
                 itemCount: availableSlots.fold<int>(0, (sum, slot) {
-                  // Calculate total 1-hour intervals across all available slots
+                  // Calculate total 30-minute intervals across all available slots
                   DateTime start =
                       DateFormat('HH:mm').parse(slot['start_time']);
                   DateTime end = DateFormat('HH:mm').parse(slot['end_time']);
-                  return sum + end.difference(start).inHours;
+                  return sum + (end.difference(start).inMinutes ~/ 30);
                 }),
                 itemBuilder: (context, index) {
-                  // Flatten the list of slots into individual 1-hour intervals
-                  List<TimeOfDay> oneHourSlots = [];
+                  // Flatten the list of slots into individual 30-minute intervals
+                  List<TimeOfDay> halfHourSlots = [];
                   for (var slot in availableSlots) {
                     DateTime start =
                         DateFormat('HH:mm').parse(slot['start_time']);
                     DateTime end = DateFormat('HH:mm').parse(slot['end_time']);
 
                     while (start.isBefore(end)) {
-                      oneHourSlots.add(
+                      halfHourSlots.add(
                           TimeOfDay(hour: start.hour, minute: start.minute));
-                      start = start.add(const Duration(hours: 1));
+                      start = start
+                          .add(const Duration(minutes: 30)); // Add 30 minutes
                     }
                   }
 
                   // Get the current slot for the grid item
-                  final timeSlot = oneHourSlots[index];
+                  final timeSlot = halfHourSlots[index];
 
                   // Check if this slot is selected
                   final bool isSelected = selectedSlotTime == timeSlot;
@@ -417,7 +418,6 @@ class _ScheduleHospitalScreenState extends State<ScheduleHospitalScreen> {
                   );
                 },
               ),
-
             // Service Type Dropdown
             const SizedBox(height: 20),
             Text(

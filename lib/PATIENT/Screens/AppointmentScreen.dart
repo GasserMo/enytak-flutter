@@ -36,7 +36,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
       return;
     }
 
-    final url = Uri.parse('http://164.92.111.149/api/appointments/');
+    final url = Uri.parse(
+        'http://164.92.111.149/api/providers/hospital/$hospitalId/appointments/');
     final response = await http.get(
       url,
       headers: {
@@ -46,11 +47,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
     if (response.statusCode == 200) {
       final data = json.decode(utf8.decode(response.bodyBytes));
-      final appointments = data['results'];
-
-      final matchedAppointments = appointments
-          .where((appointment) => appointment['hospital'] == hospitalId)
-          .toList();
+      final matchedAppointments = data as List;
 
       if (matchedAppointments.isNotEmpty) {
         setState(() {

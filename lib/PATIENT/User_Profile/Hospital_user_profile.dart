@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/Edit_profile.dart';
+import 'package:flutter_sanar_proj/PATIENT/User_Profile/Edit_provider_hospital.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/add_Service.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/availabilty_Screen.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/change_password.dart';
@@ -742,14 +743,32 @@ class _HospitalUserProfileState extends State<HospitalUserProfile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Hospital Information",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
-                  ),
-                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Lab Information",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      GestureDetector(
+                          onTap: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditProviderHospital(
+                                    hospitalData: hospitalData),
+                              ),
+                            );
+                            if (result == true) {
+                              await refreshData();
+                            }
+                          },
+                          child: Icon(Icons.edit, color: primaryColor)),
+                    ]),
                 const SizedBox(height: 16),
                 Text(
                   'Hospital Id: ${hospitalData['id'] ?? 'N/A'}',
@@ -771,8 +790,11 @@ class _HospitalUserProfileState extends State<HospitalUserProfile> {
                 ),
                 doctors.isEmpty
                     ? const Center(
-                        child:
-                            CircularProgressIndicator()) // Show a loading indicator while doctors are loading
+                        child: Text(
+                          'No doctors available.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ) // Show a loading indicator while doctors are loading
                     : ListView.builder(
                         shrinkWrap: true, // To prevent overflow issues
                         itemCount: doctors.length,
@@ -816,8 +838,11 @@ class _HospitalUserProfileState extends State<HospitalUserProfile> {
                 ),
                 nurses.isEmpty
                     ? const Center(
-                        child:
-                            CircularProgressIndicator()) // Show a loading indicator while nurses are loading
+                        child: Text(
+                          'No Nurses available.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ) // Show a loading indicator while nurses are loading
                     : ListView.builder(
                         shrinkWrap: true,
                         itemCount: nurses.length,
@@ -860,7 +885,12 @@ class _HospitalUserProfileState extends State<HospitalUserProfile> {
                   ),
                 ),
                 services.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(
+                        child: Text(
+                          'No Services available.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
                     : ListView.builder(
                         shrinkWrap: true,
                         itemCount: services.length,

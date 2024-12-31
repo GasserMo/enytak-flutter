@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_sanar_proj/PATIENT/User_Profile/Edit_Provider.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/Edit_profile.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/add_Service.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/add_service_lab.dart';
@@ -261,6 +262,7 @@ class _LabUserProfileState extends State<LabUserProfile> {
     // Reload all necessary data
     await fetchUserData();
     await fetchAvailabilities();
+    fetchLab();
   }
 
   @override
@@ -295,42 +297,64 @@ class _LabUserProfileState extends State<LabUserProfile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => AddAvailabilityScreen()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                // Add Availability Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => AddAvailabilityScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Add Availability',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                    child: const Text(
+                      'Add Availability',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                      overflow:
+                          TextOverflow.ellipsis, // Add ellipsis for long text
+                    ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LabAddService(),
+                const SizedBox(width: 12), // Add spacing between buttons
+                // Add Service Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LabAddService(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    child: const Text(
+                      'Add Service',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                      overflow:
+                          TextOverflow.ellipsis, // Add ellipsis for long text
                     ),
-                  ),
-                  child: const Text(
-                    'Add Service',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
               ],
@@ -463,14 +487,33 @@ class _LabUserProfileState extends State<LabUserProfile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Lab Information",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
-                  ),
-                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Lab Information",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      GestureDetector(
+                          onTap: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EditProvider(labData: labData),
+                              ),
+                            );
+                            if (result == true) {
+                              await refreshData();
+                            }
+                          },
+                          child: Icon(Icons.edit, color: primaryColor)),
+                    ]),
+                const SizedBox(height: 4),
                 const SizedBox(height: 16),
 
                 Text(

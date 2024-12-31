@@ -322,13 +322,19 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                               // Full Name with View Profile
                               Row(
                                 children: [
-                                  // User Name
-                                  Text(
-                                    user['full_name'] ?? 'No name available',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black87,
+                                  // User Name with ellipsis
+                                  Expanded(
+                                    child: Text(
+                                      user['full_name'] ?? 'No name available',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.black87,
+                                      ),
+                                      overflow: TextOverflow
+                                          .ellipsis, // Add ellipsis for overflowing text
+                                      maxLines:
+                                          1, // Ensure the text fits in one line
                                     ),
                                   ),
                                   SizedBox(width: 8),
@@ -357,6 +363,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                                   ),
                                 ],
                               ),
+
                               SizedBox(height: 4),
                               // Price
                               Text(
