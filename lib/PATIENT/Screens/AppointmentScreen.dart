@@ -130,7 +130,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
     ).then((updatedStatus) {
       if (updatedStatus != null) {
         setState(() {
-          appointment['status'] = updatedStatus; // Update the status locally
+          appointment['status'] = updatedStatus;
         });
       }
     });
