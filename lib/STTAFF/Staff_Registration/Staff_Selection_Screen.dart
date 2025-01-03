@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sanar_proj/STTAFF/Staff_Registration/Registiration_staff_lab.dart';
+import 'package:flutter_sanar_proj/LAB/Registiration_staff_lab.dart';
 import 'package:flutter_sanar_proj/STTAFF/Staff_Registration/Registration_Staff_Doctor_Screen.dart';
-import 'package:flutter_sanar_proj/STTAFF/Staff_Registration/Registration_Staff_Hospital_Screen.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/Registration_Staff_Hospital_Screen.dart';
 import 'package:flutter_sanar_proj/STTAFF/Staff_Registration/Registration_Staff_Nurse_Screen.dart';
 
 class StaffSelectionScreen extends StatelessWidget {

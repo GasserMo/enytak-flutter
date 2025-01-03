@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_bottomNAVbar.dart';
-import 'package:flutter_sanar_proj/STTAFF/Widgets/Lab_bottom_navbar.dart';
+import 'package:flutter_sanar_proj/LAB/Lab_bottom_navbar.dart';
 import 'package:flutter_sanar_proj/STTAFF/Widgets/customDoctor_bottomNAVbar.dart';
 import 'package:flutter_sanar_proj/STTAFF/Widgets/customNurse_bottomNAVbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';

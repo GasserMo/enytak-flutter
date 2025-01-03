@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_sanar_proj/PATIENT/Screens/ProviderDetailsScreen.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/ProviderDetailsScreen.dart';
 import 'package:http/http.dart' as http;
 
 class ServiceScreen extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/Map_Service/Service.dart';
-import 'package:flutter_sanar_proj/PATIENT/Screens/ServiceScreen.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/ServiceScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Staff_List/DoctorListScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Staff_List/LaboratoryScreen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

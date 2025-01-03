@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sanar_proj/PATIENT/User_Profile/Hospital_user_profile.dart';
-import 'package:flutter_sanar_proj/PATIENT/User_Profile/lab_user_profile.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/Hospital_user_profile.dart';
+import 'package:flutter_sanar_proj/LAB/lab_user_profile.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_AppBar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

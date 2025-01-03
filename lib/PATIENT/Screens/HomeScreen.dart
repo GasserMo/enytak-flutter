@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_sanar_proj/PATIENT/Screens/ServiceScreen.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/ServiceScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/StaffDetails/doctor_details.dart';
 import 'package:flutter_sanar_proj/PATIENT/StaffDetails/nurse_details.dart';
 import 'package:flutter_sanar_proj/PATIENT/Staff_List/DoctorListScreen.dart';

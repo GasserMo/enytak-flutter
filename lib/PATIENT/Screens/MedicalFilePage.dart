@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sanar_proj/PATIENT/Screens/MedicalReports.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/MedicalReports.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_AppBar.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/MedicalFileDetails.dart';
 

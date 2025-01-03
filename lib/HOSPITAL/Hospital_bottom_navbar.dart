@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sanar_proj/PATIENT/Screens/AppointmentScreen.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/AppointmentScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/HomeScreen.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/MedicalFilePage.dart';
 import 'package:flutter_sanar_proj/PATIENT/Screens/SchedulePage.dart';

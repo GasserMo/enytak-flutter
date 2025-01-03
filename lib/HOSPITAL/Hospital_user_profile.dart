@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_sanar_proj/PATIENT/User_Profile/Edit_profile.dart';
-import 'package:flutter_sanar_proj/PATIENT/User_Profile/Edit_provider_hospital.dart';
-import 'package:flutter_sanar_proj/PATIENT/User_Profile/add_Service.dart';
-import 'package:flutter_sanar_proj/PATIENT/User_Profile/availabilty_Screen.dart';
-import 'package:flutter_sanar_proj/PATIENT/User_Profile/change_password.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/Edit_provider_hospital.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/add_Service.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/availabilty_Screen.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/change_password.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Colors/colors.dart';
 import 'package:flutter_sanar_proj/PATIENT/Widgets/Constant_Widgets/custom_bottomNAVbar.dart';
-import 'package:flutter_sanar_proj/STTAFF/Staff_Registration/Hospital_bottom_navbar.dart';
+import 'package:flutter_sanar_proj/HOSPITAL/Hospital_bottom_navbar.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
